@@ -1,0 +1,5 @@
+- rewsr-piers is the permissionless-to-privileged data-plane tier ladder for Rewsr, where each "pier" is one way of moving data in or out of a workload.
+- The tiers are ordered by how much privilege the host must grant, from a pure-Go UDP floor that runs anywhere up through AF_XDP zero-copy and an RDMA/DPDK-class kernel-bypass tier.
+- Every tier above the baseline is opportunistic and detected against the live host, so a tier is used only if the current machine genuinely supports it right now, not in theory.
+- Select() walks the ladder from most to least privileged and returns the first usable pier plus a skip reason for every tier above it, producing a truth report rather than a feature matrix.
+- It is for operators placing data-plane workloads on heterogeneous bare metal who need the fastest transport a given host can actually provide, with a guaranteed fallback.
