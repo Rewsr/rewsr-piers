@@ -15,12 +15,17 @@ import (
 )
 
 func main() {
+	// No arguments is the fast path: print a human-readable report of the
+	// fastest transport this host can actually use right now and why the
+	// faster tiers were skipped. Subcommands stay machine-readable (JSON).
 	if len(os.Args) < 2 {
-		usage()
-		os.Exit(1)
+		runReport()
+		return
 	}
 
 	switch os.Args[1] {
+	case "report":
+		runReport()
 	case "detect":
 		runDetect(os.Args[2:])
 	case "probe":
@@ -37,12 +42,50 @@ func main() {
 }
 
 func usage() {
-	fmt.Fprintln(os.Stderr, `piers - pier ladder CLI
+	fmt.Fprintln(os.Stderr, `piers - the fastest transport this host can actually run
 
 Usage:
-  piers detect   print the pier ladder selection result as JSON
-  piers probe    print the fabric-independence audit report as JSON
-  piers bench    run the tier0 UDP loopback benchmark and print latency and throughput`)
+  piers          report the selected tier and why faster tiers were skipped
+  piers detect   the selection result as JSON
+  piers probe    the fabric-independence audit report as JSON
+  piers bench    run the tier0 UDP loopback benchmark (latency + throughput)`)
+}
+
+// runReport prints the pier ladder result for the local host in plain text:
+// which tier was selected, what it guarantees, and a one-line reason for
+// every faster tier that was not usable. This is the truth report a human
+// wants on first run, no JSON parsing required.
+func runReport() {
+	selected, skips := pier.Select()
+
+	fmt.Println("piers - fabric transport on this host")
+	fmt.Println()
+	if selected == nil {
+		fmt.Println("  selected: none (no tier is usable on this host)")
+	} else {
+		g := selected.Guarantees()
+		fmt.Printf("  selected: %s\n", selected.Name())
+		fmt.Printf("            %s\n", g.Description)
+		fmt.Printf("            <= %d us latency budget, up to %d Mbps", g.LatencyBudgetUs, g.MaxThroughputMbps)
+		if g.RequiresRoot {
+			fmt.Print(", needs root")
+		}
+		if g.RequiresKernelModule {
+			fmt.Print(", needs kernel module")
+		}
+		fmt.Println()
+	}
+
+	fmt.Println()
+	if len(skips) == 0 {
+		fmt.Println("  faster tiers: none skipped (this is already the top usable tier)")
+	} else {
+		fmt.Println("  faster tiers skipped:")
+		for _, s := range skips {
+			fmt.Printf("    %-18s %s\n", s.Pier, s.Reason)
+		}
+	}
+	fmt.Println()
 }
 
 // detectOutput is the JSON shape printed by `piers detect`. It wraps

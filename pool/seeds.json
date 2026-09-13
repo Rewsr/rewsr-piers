@@ -1,0 +1,45 @@
+{
+  "note": "Seed pool. Values are ESTIMATED from public sources, not measured by our harness. Each entry stays source=seed|public until a real run overwrites it with source=measured. The seed pool exists only to make cold-start non-empty; the moat is the measured entries that replace it.",
+  "entries": [
+    {
+      "sku": "aws-c6i.xlarge",
+      "class": "cheap",
+      "nic": "AWS ENA (Nitro)",
+      "link_gbps": 12.5,
+      "rdma": false,
+      "xdp": true,
+      "piers_max_tier": "tier1-afxdp",
+      "est_p99_latency_us_64b": 45,
+      "est_throughput_gbps": 12,
+      "usd_per_hr": 0.17,
+      "source": "seed"
+    },
+    {
+      "sku": "aws-c5n.18xlarge",
+      "class": "pricey",
+      "nic": "AWS EFA + ENA",
+      "link_gbps": 100,
+      "rdma": true,
+      "kernel_bypass": "efa-srd",
+      "piers_max_tier": "tier2-privileged",
+      "est_p99_latency_us_64b": 18,
+      "est_throughput_gbps": 92,
+      "usd_per_hr": 3.89,
+      "source": "seed"
+    },
+    {
+      "sku": "mlx5-connectx6-100g-baremetal",
+      "class": "pricey-target",
+      "nic": "NVIDIA ConnectX-6 100G, mlx5 driver (RoCEv2/IB, full RDMA offload)",
+      "link_gbps": 100,
+      "rdma": true,
+      "kernel_bypass": "rdma-verbs",
+      "piers_max_tier": "tier2-privileged",
+      "est_p99_latency_us_64b": 1.2,
+      "est_throughput_gbps": 97,
+      "usd_per_hr": null,
+      "access": "user gets access in ~3 months (Phase 3 target); numbers are OSU OMB public until then",
+      "source": "public-osu-omb"
+    }
+  ]
+}
